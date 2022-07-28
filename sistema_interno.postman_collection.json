@@ -1,0 +1,225 @@
+{
+	"info": {
+		"_postman_id": "88232740-eff0-4c8f-88dd-5d3a30e71d08",
+		"name": "sistema_interno",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17069776"
+	},
+	"item": [
+		{
+			"name": "Proveedores",
+			"item": [
+				{
+					"name": "Get proveedores",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/v1/proveedores/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"proveedores",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create proveedor",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n            \"prov_asoc\": \"247b\",\r\n            \"prov_dni\": 12108029,\r\n            \"prov_nombre\": \"GROLO, Hugo Ignacio\",\r\n            \"prov_titularVehiculo\": \"GROLO, Hugo Ignacio\",\r\n            \"chofer\": \"GROLO, Marcos Ariel\",\r\n            \"chofer_dni\": 36531848,\r\n            \"chofer_patente\": \"GKA 955\",\r\n            \"chofer_habilitacion\": 247,\r\n            \"chofer_vtoHab\": \"2020-02-05\",\r\n            \"chofer_seguro\": \"PROVIDENCIA\",\r\n            \"chofer_nPoliza\": 952649,\r\n            \"chofer_vtoPoliza\": \"2020-02-05\",\r\n            \"chofer_nVtv\": 221900274,\r\n            \"chofer_vtoVtv\": \"2020-02-05\",\r\n            \"chofer_vehiculo\": \"M BENZ\",\r\n            \"chofer_vehiculoCapacidad\": 48,\r\n            \"chofer_cupon\": \"2020-02-05\",\r\n            \"chofer_registro\": \"2020-02-05\",\r\n            \"chofer_prorroga\": \"\",\r\n            \"chofer_cuitSocio\": \"20263458169\",\r\n            \"chofer_nombreTitular\": \"DURSO, Fernando J\",\r\n            \"chofer_cuitTitular\": \"20263458169\",\r\n            \"chofer_anioMod\": 2006\r\n        }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/proveedores/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"proveedores",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create proveedor Image",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "img",
+									"type": "file",
+									"src": "/C:/Users/PC-01/Downloads/logo_final-01.png"
+								},
+								{
+									"key": "img_nombre",
+									"value": "dni_frente",
+									"type": "text"
+								},
+								{
+									"key": "prov_id",
+									"value": "54",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/proveedores/image?img",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"proveedores",
+								"image"
+							],
+							"query": [
+								{
+									"key": "img",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get proveedor Image",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"prov_id\": 54 \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/proveedores/image",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"proveedores",
+								"image"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"\",\r\n    \"password\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "singUp",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Matias\",\r\n    \"email\": \"matias@email.com\",\r\n    \"password\": \"1234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/auth/signUp",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"signUp"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CheckHealt",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
