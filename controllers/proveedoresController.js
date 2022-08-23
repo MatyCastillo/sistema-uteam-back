@@ -37,7 +37,6 @@ exports.createNewProv = async (req, res) => {
     chofer_registro,
     chofer_prorroga,
     chofer_cuitSocio,
-    chofer_nombreTitular,
     chofer_cuitTitular,
     chofer_anioMod,
   } = req.body;
@@ -63,13 +62,12 @@ exports.createNewProv = async (req, res) => {
     chofer_registro,
     chofer_prorroga,
     chofer_cuitSocio,
-    chofer_nombreTitular,
     chofer_cuitTitular,
     chofer_anioMod,
   ];
 
   mysqlConnection.query(
-    "INSERT INTO proveedores ( `prov_asoc`, `prov_dni`, `prov_nombre`, `prov_titularVehiculo`, `chofer`, `chofer_dni`, `chofer_patente`, `chofer_habilitacion`, `chofer_vtoHab`, `chofer_seguro`, `chofer_nPoliza`, `chofer_vtoPoliza`, `chofer_nVtv`, `chofer_vtoVtv`, `chofer_vehiculo`, `chofer_vehiculoCapacidad`, `chofer_cupon`, `chofer_registro`, `chofer_prorroga`, `chofer_cuitSocio`, `chofer_nombreTitular`, `chofer_cuitTitular`, `chofer_anioMod`) VALUES (?) ",
+    "INSERT INTO proveedores ( `prov_asoc`, `prov_dni`, `prov_nombre`, `prov_titularVehiculo`, `chofer`, `chofer_dni`, `chofer_patente`, `chofer_habilitacion`, `chofer_vtoHab`, `chofer_seguro`, `chofer_nPoliza`, `chofer_vtoPoliza`, `chofer_nVtv`, `chofer_vtoVtv`, `chofer_vehiculo`, `chofer_vehiculoCapacidad`, `chofer_cupon`, `chofer_registro`, `chofer_prorroga`, `chofer_cuitSocio`,  `chofer_cuitTitular`, `chofer_anioMod`) VALUES (?) ",
     [newRecord],
     (err, rows, fields) => {
       if (!err) {

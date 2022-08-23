@@ -1,24 +1,22 @@
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
 
-const authRoutes = require("./routes/authRoutes.js"); 
+const authRoutes = require("./routes/authRoutes.js");
 const proveedoresRoutes = require("./routes/proveedoresRoutes.js");
 
 const app = express();
 
-
 //** DESDE ACAAAA **/
-var whitelist = ['http://example1.com', 'http://example2.com']
+var whitelist = ["http://localhost:3000/loged", "http://localhost:3000"];
 var corsOptionsDelegate = function (req, callback) {
   var corsOptions;
-  if (whitelist.indexOf(req.header('Origin')) !== -1) {
-    corsOptions = { origin: true } // reflect (enable) the requested origin in the CORS response
+  if (whitelist.indexOf(req.header("Origin")) !== -1) {
+    corsOptions = { origin: true }; // reflect (enable) the requested origin in the CORS response
   } else {
-    corsOptions = { origin: false } // disable CORS for this request
+    corsOptions = { origin: false }; // disable CORS for this request
   }
-  callback(null, corsOptions) // callback expects two parameters: error and options
-}
- 
+  callback(null, corsOptions); // callback expects two parameters: error and options
+};
 
 app.use(cors(corsOptionsDelegate));
 //************** HASTA ACA ***************//
