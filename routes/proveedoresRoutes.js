@@ -14,11 +14,13 @@ router
 
 router
   .route("/image")
-  .post(upload.single("img"), proveedoresController.updateImg)
-  .get(proveedoresController.getImageById);
+  .post(upload.single("img"), proveedoresController.updateImg);
+//.get(proveedoresController.getImageById);
 
 router.route("/prov-:id").get(proveedoresController.getIdProv);
 
 router.route("/:id").put(proveedoresController.updateProv);
+
+router.route("/image/:prov_id").get(proveedoresController.getImageById);
 
 module.exports = router;

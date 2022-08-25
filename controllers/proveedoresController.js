@@ -80,6 +80,7 @@ exports.createNewProv = async (req, res) => {
           status: "error",
           message: err,
         });
+        console.log(err);
       }
     }
   );
@@ -231,7 +232,8 @@ exports.updateProv = async (req, res) => {
 };
 
 exports.updateImg = async (req, res) => {
-  const ruta = req.file.path;
+  const ruta = Date.now() + "-" + req.file.originalname;
+  console.log(Date.now() + "-" + req.file.originalname);
   const { img_nombre, prov_id } = req.body;
   const data = [ruta, img_nombre, prov_id];
 
@@ -256,11 +258,12 @@ exports.updateImg = async (req, res) => {
 
 exports.getImageById = async (req, res) => {
   try {
-    const prov_id = req.body.prov_id;
+    const prov_id = req.params.prov_id;
     mysqlConnection.query(
       "SELECT img_path, img_nombre FROM images WHERE prov_id = ?",
       [prov_id],
       (err, rows, fields) => {
+        console.log(req);
         if (!err) {
           if (rows[0]) {
             res.status(200).json({
@@ -268,6 +271,7 @@ exports.getImageById = async (req, res) => {
               data: rows,
             });
           } else {
+            console.log(req);
             res.status(404).json({
               status: "error",
               message: "Image was not found",
