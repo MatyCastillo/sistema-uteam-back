@@ -1,5 +1,7 @@
 const mysqlConnection = require("../database/db.js");
 
+let imgName;
+
 exports.health = async (req, res) => {
   try {
     // SEND RESPONSE
@@ -232,11 +234,9 @@ exports.updateProv = async (req, res) => {
 };
 
 exports.updateImg = async (req, res) => {
-  const ruta = Date.now() + "-" + req.file.originalname;
-  console.log(Date.now() + "-" + req.file.originalname);
+  const ruta = req.file.filename;
   const { img_nombre, prov_id } = req.body;
   const data = [ruta, img_nombre, prov_id];
-
   mysqlConnection.query(
     "INSERT INTO images (`img_path`, `img_nombre`, `prov_id`) VALUES (?)",
     [data],
@@ -263,7 +263,6 @@ exports.getImageById = async (req, res) => {
       "SELECT img_path, img_nombre FROM images WHERE prov_id = ?",
       [prov_id],
       (err, rows, fields) => {
-        console.log(req);
         if (!err) {
           if (rows[0]) {
             res.status(200).json({
@@ -271,7 +270,6 @@ exports.getImageById = async (req, res) => {
               data: rows,
             });
           } else {
-            console.log(req);
             res.status(404).json({
               status: "error",
               message: "Image was not found",
