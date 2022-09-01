@@ -33,8 +33,8 @@ exports.login = async (req, res) => {
 
     if (!nombre || !password) {
       return res.status(400).json({
-        status: "no credentials",
-        message: "Provide name and password",
+        status: "error",
+        message: "Ingrese usuario y/o contraseña",
       });
     } else {
       mysqlConnection.query(
@@ -42,16 +42,17 @@ exports.login = async (req, res) => {
         nombre,
         (err, user, fields) => {
           if (user.length === 0) {
-            return res
-              .status(401)
-              .json({ status: "user error", message: "Incorrect user" });
+            return res.status(401).json({
+              status: "error",
+              message: "Usuario o contraseña incorrectos",
+            });
           } else {
             if (!err) {
               //const correct = await bcrypt.compare(contraseña, users[0].contraseña);
               if (user[0].password !== password) {
                 return res.status(401).json({
                   status: "incorrect credentials",
-                  message: "Incorrect name or password",
+                  message: "Usuario o contraseña incorrectos",
                 });
               } else {
                 const token = jwt.sign({ nombre: nombre }, process.env.SECRET, {
