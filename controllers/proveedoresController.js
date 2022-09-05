@@ -68,30 +68,53 @@ exports.createNewProv = async (req, res) => {
     chofer_anioMod,
   ];
 
-  mysqlConnection.query(
-    "INSERT INTO proveedores ( `prov_asoc`, `prov_dni`, `prov_nombre`, `prov_titularVehiculo`, `chofer`, `chofer_dni`, `chofer_patente`, `chofer_habilitacion`, `chofer_vtoHab`, `chofer_seguro`, `chofer_nPoliza`, `chofer_vtoPoliza`, `chofer_nVtv`, `chofer_vtoVtv`, `chofer_vehiculo`, `chofer_vehiculoCapacidad`, `chofer_cupon`, `chofer_registro`, `chofer_prorroga`, `chofer_cuitSocio`,  `chofer_cuitTitular`, `chofer_anioMod`) VALUES (?) ",
-    [newRecord],
-    (err, rows, fields) => {
-      if (!err) {
-        res.status(200).json({
-          status: "success",
-          message: "New inscription created",
-        });
-      } else {
-        res.status(500).json({
-          status: "error",
-          message: err,
-        });
-        console.log(err);
+  const idAs = newRecord[0];
+
+  try {
+    mysqlConnection.query(
+      "SELECT * FROM proveedores WHERE prov_asoc =  ?",
+      [idAs],
+      (err, result) => {
+        if (result.length !== 0) {
+          res.status(200).json({
+            status: "error",
+            message: "Id de socio ya asignado",
+          });
+        } else {
+          mysqlConnection.query(
+            "INSERT INTO proveedores ( `prov_asoc`, `prov_dni`, `prov_nombre`, `prov_titularVehiculo`, `chofer`, `chofer_dni`, `chofer_patente`, `chofer_habilitacion`, `chofer_vtoHab`, `chofer_seguro`, `chofer_nPoliza`, `chofer_vtoPoliza`, `chofer_nVtv`, `chofer_vtoVtv`, `chofer_vehiculo`, `chofer_vehiculoCapacidad`, `chofer_cupon`, `chofer_registro`, `chofer_prorroga`, `chofer_cuitSocio`,  `chofer_cuitTitular`, `chofer_anioMod`) VALUES (?) ",
+            [newRecord],
+            (err, rows, fields) => {
+              if (!err) {
+                res.status(200).json({
+                  status: "success",
+                  message: "Socio agregado exitosamente",
+                });
+              } else {
+                res.status(500).json({
+                  status: "error",
+                  message: "Se produjo un error al intentar agregar el socio",
+                });
+                console.log(err);
+              }
+            }
+          );
+        }
       }
-    }
-  );
+    );
+  } catch (error) {
+    res.status(500).json(error);
+  }
 };
 
 exports.getAllProvs = async (req, res) => {
   try {
     mysqlConnection.query("SELECT * FROM proveedores ", (err, rows, fields) => {
       if (!err) {
+        rows.forEach((element) => {
+          element.idPlus = element.id + 1;
+        });
+        console.log(rows);
         res.status(200).json({
           status: "success",
           data: rows,
@@ -107,6 +130,8 @@ exports.getAllProvs = async (req, res) => {
     res.status(500).json(error);
   }
 };
+
+exports.getAllExpireProvs;
 
 exports.getIdProv = async (req, res) => {
   try {
