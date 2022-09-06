@@ -1,5 +1,6 @@
 const mysqlConnection = require("../database/db.js");
-
+const dateNow = new Date();
+dateNow.setHours(0, 0, 0, 0);
 let imgName;
 
 exports.health = async (req, res) => {
@@ -112,9 +113,27 @@ exports.getAllProvs = async (req, res) => {
     mysqlConnection.query("SELECT * FROM proveedores ", (err, rows, fields) => {
       if (!err) {
         rows.forEach((element) => {
-          element.idPlus = element.id + 1;
+          let isExpired;
+          if (
+            element.chofer_prorroga != "0000-00-00" ||
+            element.chofer_prorroga != undefined ||
+            element.chofer_prorroga != null
+          ) {
+            element.chofer_prorroga < dateNow
+              ? (isExpired = "Expired")
+              : (isExpired = "NotExpired");
+          }
+          element.chofer_vtoHab < dateNow ||
+          element.chofer_vtoPoliza < dateNow ||
+          element.chofer_vtoVtv < dateNow ||
+          element.chofer_cupon < dateNow ||
+          element.chofer_registro < dateNow
+            ? (isExpired = "Expired")
+            : (isExpired = "NotExpired");
+          element.expire = isExpired;
         });
         console.log(rows);
+        console.log(dateNow);
         res.status(200).json({
           status: "success",
           data: rows,
@@ -130,8 +149,6 @@ exports.getAllProvs = async (req, res) => {
     res.status(500).json(error);
   }
 };
-
-exports.getAllExpireProvs;
 
 exports.getIdProv = async (req, res) => {
   try {
@@ -149,13 +166,13 @@ exports.getIdProv = async (req, res) => {
           } else {
             res.status(404).json({
               status: "error",
-              message: "This user was not found",
+              message: "Usuario no encontrado",
             });
           }
         } else {
           res.status(500).json({
             status: "error",
-            message: err,
+            message: "Ocurrió un error inesperado, intentelo nuevamente",
           });
         }
       }
@@ -166,28 +183,36 @@ exports.getIdProv = async (req, res) => {
 };
 
 exports.deleteProv = async (req, res) => {
-  const { idProveedor } = req.body;
-  mysqlConnection.query(
-    "DELETE FROM `proveedores` WHERE `id`= ?",
-    idProveedor,
-    (err, rows, fields) => {
-      if (!err) {
-        res.status(200).json({
-          status: "success",
-          message: "Provider deleted",
-        });
-      } else {
-        res.status(500).json({
-          status: "error",
-          message: err,
-        });
+  try {
+    const { idProveedor } = req.body;
+    mysqlConnection.query(
+      "DELETE FROM `proveedores` WHERE `id`= ?",
+      idProveedor,
+      (err, rows, fields) => {
+        if (!err) {
+          res.status(200).json({
+            status: "success",
+            message: "Socio eliminado exitosamente",
+          });
+        } else {
+          res.status(500).json({
+            status: "error",
+            message: "El socio no pudo ser eliminado",
+          });
+        }
       }
-    }
-  );
+    );
+  } catch (error) {
+    res.status(200).json({
+      status: "error",
+      message: "Ocurrió un error inesperado. Intentelo nuevamente",
+    });
+  }
 };
 
 exports.updateProv = async (req, res) => {
   const idToUpdate = req.params.id;
+  console.log(req.params.id);
   const {
     prov_asoc,
     prov_dni,
@@ -213,49 +238,55 @@ exports.updateProv = async (req, res) => {
     chofer_cuitTitular,
     chofer_anioMod,
   } = req.body;
-
-  mysqlConnection.query(
-    "UPDATE `proveedores` SET prov_asoc = ?, prov_dni = ?, prov_nombre = ?, prov_titularVehiculo = ?, chofer = ?, chofer_dni = ?, chofer_patente = ?, chofer_habilitacion = ?, chofer_vtoHab = ?, chofer_seguro = ?, chofer_nPoliza = ?,chofer_vtoPoliza = ?,chofer_nVtv = ?,chofer_vtoVtv = ?,chofer_vehiculo = ?,chofer_vehiculoCapacidad = ?,chofer_cupon = ?,chofer_registro = ?,chofer_prorroga = ?,chofer_cuitSocio = ?,chofer_nombreTitular = ?,chofer_cuitTitular = ?,chofer_anioMod = ? WHERE id = ?",
-    [
-      prov_asoc,
-      prov_dni,
-      prov_nombre,
-      prov_titularVehiculo,
-      chofer,
-      chofer_dni,
-      chofer_patente,
-      chofer_habilitacion,
-      chofer_vtoHab,
-      chofer_seguro,
-      chofer_nPoliza,
-      chofer_vtoPoliza,
-      chofer_nVtv,
-      chofer_vtoVtv,
-      chofer_vehiculo,
-      chofer_vehiculoCapacidad,
-      chofer_cupon,
-      chofer_registro,
-      chofer_prorroga,
-      chofer_cuitSocio,
-      chofer_nombreTitular,
-      chofer_cuitTitular,
-      chofer_anioMod,
-      idToUpdate,
-    ],
-    (err, rows, fields) => {
-      if (!err) {
-        res.status(200).json({
-          status: "success",
-          message: "Provider updated",
-        });
-      } else {
-        res.status(500).json({
-          status: "error",
-          message: err,
-        });
+  try {
+    mysqlConnection.query(
+      "UPDATE `proveedores` SET prov_asoc = ?, prov_dni = ?, prov_nombre = ?, prov_titularVehiculo = ?, chofer = ?, chofer_dni = ?, chofer_patente = ?, chofer_habilitacion = ?, chofer_vtoHab = ?, chofer_seguro = ?, chofer_nPoliza = ?,chofer_vtoPoliza = ?,chofer_nVtv = ?,chofer_vtoVtv = ?,chofer_vehiculo = ?,chofer_vehiculoCapacidad = ?,chofer_cupon = ?,chofer_registro = ?,chofer_prorroga = ?,chofer_cuitSocio = ?,chofer_nombreTitular = ?,chofer_cuitTitular = ?,chofer_anioMod = ? WHERE id = ?",
+      [
+        prov_asoc,
+        prov_dni,
+        prov_nombre,
+        prov_titularVehiculo,
+        chofer,
+        chofer_dni,
+        chofer_patente,
+        chofer_habilitacion,
+        chofer_vtoHab,
+        chofer_seguro,
+        chofer_nPoliza,
+        chofer_vtoPoliza,
+        chofer_nVtv,
+        chofer_vtoVtv,
+        chofer_vehiculo,
+        chofer_vehiculoCapacidad,
+        chofer_cupon,
+        chofer_registro,
+        chofer_prorroga,
+        chofer_cuitSocio,
+        chofer_nombreTitular,
+        chofer_cuitTitular,
+        chofer_anioMod,
+        idToUpdate,
+      ],
+      (err, rows, fields) => {
+        if (!err) {
+          res.status(200).json({
+            status: "success",
+            message: "Socio actualizado exitosamente",
+          });
+        } else {
+          res.status(500).json({
+            status: "error",
+            message: "No se pudo actualizar",
+          });
+        }
       }
-    }
-  );
+    );
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Ocurrió un error inesperado, intentelo nuevamente",
+    });
+  }
 };
 
 exports.updateImg = async (req, res) => {
