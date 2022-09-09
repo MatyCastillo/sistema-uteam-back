@@ -122,12 +122,15 @@ exports.getAllProvs = async (req, res) => {
             element.chofer_prorroga < dateNow
               ? (isExpired = "Expired")
               : (isExpired = "NotExpired");
+          } else {
+            element.chofer_registro < dateNow
+              ? (isExpired = "Expired")
+              : (isExpired = "NotExpired");
           }
           element.chofer_vtoHab < dateNow ||
           element.chofer_vtoPoliza < dateNow ||
           element.chofer_vtoVtv < dateNow ||
-          element.chofer_cupon < dateNow ||
-          element.chofer_registro < dateNow
+          element.chofer_cupon < dateNow
             ? (isExpired = "Expired")
             : (isExpired = "NotExpired");
           element.expire = isExpired;
@@ -300,12 +303,12 @@ exports.updateImg = async (req, res) => {
       if (!err) {
         res.status(200).json({
           status: "success",
-          message: "New image created",
+          message: "Imagen guardada correctamente",
         });
       } else {
         res.status(500).json({
           status: "error",
-          message: err,
+          message: `La imagen ${img_nombre} no pudo ser guardad`,
         });
       }
     }
