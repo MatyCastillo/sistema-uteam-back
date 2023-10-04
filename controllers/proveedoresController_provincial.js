@@ -25,102 +25,6 @@ exports.health = async (req, res) => {
   }
 };
 
-// Método para generar el archivo XLSX
-const generarXLSX = (data) => {
-  var jsonData = data.data
-  const startDate = new Date(data.startDate)
-  const formatStartDate = format(startDate, 'dd-MM')
-  const endDate = new Date(data.endDate)
-  const formatEndDate = format(endDate, 'dd-MM')
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet(`desde ${formatStartDate} hasta ${formatEndDate}`);
-
-  // Definir las columnas
-  columns = [
-    { header: "Asociado", key: "prov_asoc" },
-    { header: "Apellido y Nombre", key: "prov_nombre" , width: 30},
-    { header: "Patente", key: "chofer_patente" },
-    { header: "Habilitación", key: "chofer_habilitacion", width: 12 },  
-    { header: "Vto Habilitación", key: "chofer_vtoHab", width: 15 },
-    { header: "Vto Póliza", key: "chofer_vtoPoliza", width: 15 },
-    { header: "Vto Vtv", key: "chofer_vtoVtv", width: 15 },
-    { header: "Capacidad", key: "chofer_vehiculoCapacidad", width: 10 },
-    { header: "Cupón de pago", key: "chofer_cupon" , width: 15},
-  ];
-
-  // Configurar las columnas en el worksheet
-  worksheet.columns = columns;
-
-
-  // Insertar fila 1 con los títulos
-  const headerRow = worksheet.getRow(1);
-  headerRow.eachCell((cell, colNumber) => {
-    cell.value = columns[colNumber - 1].header;
-  });
-
-  // Establecer estilo para la fila de títulos
-  headerRow.font = { bold: true };
-
-  // Agregar los datos a las filas
-  jsonData.forEach((row) => {
-    // Convertir las fechas a objetos Date si no lo son ya
-    row.chofer_vtoHab = new Date(row.chofer_vtoHab);
-    row.chofer_vtoPoliza = new Date(row.chofer_vtoPoliza);
-    row.chofer_vtoVtv = new Date(row.chofer_vtoVtv);
-    row.chofer_cupon = new Date(row.chofer_cupon);
-
-    worksheet.addRow(row);
-  });
-
-  // Aplicar formato de fecha "dd/MM/yyyy" a las columnas de fechas
-  const columnsFecha = ["chofer_vtoHab", "chofer_vtoPoliza", "chofer_vtoVtv", "chofer_cupon"];
-  columnsFecha.forEach((columnKey) => {
-    const column = worksheet.getColumn(columnKey);
-    column.eachCell({ includeEmpty: true }, (cell) => {
-      if (cell.value instanceof Date) {
-        cell.numFmt = "dd/MM/yyyy";
-
-        // Obtener la fecha actual
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        // Comparar con la fecha actual y aplicar estilo en rojo si es anterior
-        if (cell.value < today) {
-          cell.font = { color: { argb: 'FF0000' } }; // Letra en rojo
-        }
-      }
-    });
-  });
-
-  // Retornar el libro de trabajo
-  return workbook;
-};
-
-
-// Controlador para el método generarXLSX
-exports.generarXLSXController = (req, res) => {
-  // Generar el libro de trabajo (XLSX)
-  const data = req.body
-  const workbook = generarXLSX(data);
-  const startDate = new Date(data.startDate)
-  const formatStartDate = format(startDate, 'dd-MM')
-  const endDate = new Date(data.endDate)
-  const formatEndDate = format(endDate, 'dd-MM')
-
-  // Configurar el encabezado para la descarga del archivo
-  res.setHeader(
-    "Content-Disposition",
-    "attachment; filename=sheet.xlsx"
-  );
-  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-  // Enviar el archivo XLSX al cliente como una descarga
-  workbook.xlsx.write(res).then(() => {
-    res.end();
-  });
-};
-
-
 exports.createNewProv = async (req, res) => {
   const {
     prov_asoc,
@@ -147,7 +51,7 @@ exports.createNewProv = async (req, res) => {
     chofer_anioMod,
     habilitacion_colonia,
     vtoHabilitacion_colonia,
-    en_padron_prov
+    tipo_habilitacion
   } = req.body;
 
   const newRecord = [
@@ -175,14 +79,14 @@ exports.createNewProv = async (req, res) => {
     chofer_anioMod,
     habilitacion_colonia,
     vtoHabilitacion_colonia,
-    en_padron_prov
+    tipo_habilitacion
   ];
 
   const idAs = newRecord[0];
 
   try {
     mysqlConnection.query(
-      "SELECT * FROM proveedores WHERE prov_asoc =  ?",
+      "SELECT * FROM proveedores_provincial WHERE prov_asoc =  ?",
       [idAs],
       (err, result) => {
         if (result.length !== 0) {
@@ -193,7 +97,7 @@ exports.createNewProv = async (req, res) => {
         } else {
           try {
             mysqlConnection.query(
-              "INSERT INTO proveedores ( `prov_asoc`, `prov_dni`, `prov_nombre`, `prov_titularVehiculo`, `chofer`, `chofer_dni`, `chofer_patente`, `chofer_habilitacion`, `chofer_vtoHab`, `chofer_seguro`, `chofer_nPoliza`, `chofer_vtoPoliza`, `chofer_nVtv`, `chofer_vtoVtv`, `chofer_vehiculo`, `chofer_vehiculoCapacidad`, `chofer_cupon`, `chofer_registro`, `chofer_prorroga`, `chofer_cuitSocio`,  `chofer_cuitTitular`, `chofer_anioMod`,`habilitacion_colonia`,`vtoHabilitacion_colonia`,`en_padron_prov`) VALUES (?) ",
+              "INSERT INTO proveedores_provincial ( `prov_asoc`, `prov_dni`, `prov_nombre`, `prov_titularVehiculo`, `chofer`, `chofer_dni`, `chofer_patente`, `chofer_habilitacion`, `chofer_vtoHab`, `chofer_seguro`, `chofer_nPoliza`, `chofer_vtoPoliza`, `chofer_nVtv`, `chofer_vtoVtv`, `chofer_vehiculo`, `chofer_vehiculoCapacidad`, `chofer_cupon`, `chofer_registro`, `chofer_prorroga`, `chofer_cuitSocio`,  `chofer_cuitTitular`, `chofer_anioMod`,`habilitacion_colonia`,`vtoHabilitacion_colonia`,`tipo_habilitacion`) VALUES (?) ",
               [newRecord],
               (err, rows, fields) => {
                 if (!err) {
@@ -233,7 +137,7 @@ exports.createNewProv = async (req, res) => {
 exports.getDeleteProvs = async (req, res) => {
   try {
     mysqlConnection.query(
-      "SELECT * FROM proveedores  WHERE eliminado = 1",
+      "SELECT * FROM proveedores_provincial  WHERE eliminado = 1",
       (err, rows, fields) => {
         if (!err) {
           rows.forEach((element) => {
@@ -281,7 +185,7 @@ exports.getDeleteProvs = async (req, res) => {
 exports.getAllProvs = async (req, res) => {
   try {
     mysqlConnection.query(
-      "SELECT * FROM proveedores  WHERE eliminado = 0 ORDER BY CAST(prov_asoc AS INT) ASC",
+      "SELECT * FROM proveedores_provincial  WHERE eliminado = 0 ORDER BY CAST(prov_asoc AS INT) ASC",
       (err, rows, fields) => {
         if (!err) {
           rows.forEach((element) => {
@@ -335,7 +239,7 @@ exports.getIdProv = async (req, res) => {
   try {
     const id = req.params.id;
     mysqlConnection.query(
-      "SELECT * FROM proveedores WHERE id = ?",
+      "SELECT * FROM proveedores_provincial WHERE id = ?",
       [id],
       (err, rows, fields) => {
         if (!err) {
@@ -367,7 +271,7 @@ exports.deleteProv = async (req, res) => {
   try {
     const { idProveedor } = req.body;
     mysqlConnection.query(
-      "DELETE FROM `proveedores` WHERE `id`= ?",
+      "DELETE FROM `proveedores_provincial` WHERE `id`= ?",
       idProveedor,
       (err, rows, fields) => {
         if (!err) {
@@ -421,7 +325,7 @@ exports.markAsDeleted = async (req, res) => {
   } = req.body;
   try {
     mysqlConnection.query(
-      "UPDATE `proveedores` SET prov_asoc = ?, prov_dni = ?, prov_nombre = ?, prov_titularVehiculo = ?, chofer = ?, chofer_dni = ?, chofer_patente = ?, chofer_habilitacion = ?, chofer_vtoHab = ?, chofer_seguro = ?, chofer_nPoliza = ?,chofer_vtoPoliza = ?,chofer_nVtv = ?,chofer_vtoVtv = ?,chofer_vehiculo = ?,chofer_vehiculoCapacidad = ?,chofer_cupon = ?,chofer_registro = ?,chofer_prorroga = ?,chofer_cuitSocio = ?,chofer_nombreTitular = ?,chofer_cuitTitular = ?,chofer_anioMod = ?,eliminado = ? WHERE id = ?",
+      "UPDATE `proveedores_provincial` SET prov_asoc = ?, prov_dni = ?, prov_nombre = ?, prov_titularVehiculo = ?, chofer = ?, chofer_dni = ?, chofer_patente = ?, chofer_habilitacion = ?, chofer_vtoHab = ?, chofer_seguro = ?, chofer_nPoliza = ?,chofer_vtoPoliza = ?,chofer_nVtv = ?,chofer_vtoVtv = ?,chofer_vehiculo = ?,chofer_vehiculoCapacidad = ?,chofer_cupon = ?,chofer_registro = ?,chofer_prorroga = ?,chofer_cuitSocio = ?,chofer_nombreTitular = ?,chofer_cuitTitular = ?,chofer_anioMod = ?,eliminado = ? WHERE id = ?",
       [
         prov_asoc,
         prov_dni,
@@ -500,12 +404,12 @@ exports.updateProv = async (req, res) => {
     chofer_anioMod,
     habilitacion_colonia,
     vtoHabilitacion_colonia,
-    en_padron_prov,
+    tipo_habilitacion,
     eliminado,
   } = req.body;
   try {
     mysqlConnection.query(
-      "UPDATE `proveedores` SET prov_asoc = ?, prov_dni = ?, prov_nombre = ?, prov_titularVehiculo = ?, chofer = ?, chofer_dni = ?, chofer_patente = ?, chofer_habilitacion = ?, chofer_vtoHab = ?, chofer_seguro = ?, chofer_nPoliza = ?,chofer_vtoPoliza = ?,chofer_nVtv = ?,chofer_vtoVtv = ?,chofer_vehiculo = ?,chofer_vehiculoCapacidad = ?,chofer_cupon = ?,chofer_registro = ?,chofer_prorroga = ?,chofer_cuitSocio = ?,chofer_nombreTitular = ?,chofer_cuitTitular = ?,chofer_anioMod = ?, habilitacion_colonia = ?,vtoHabilitacion_colonia = ?,en_padron_prov = ? ,eliminado = ? WHERE id = ?",
+      "UPDATE `proveedores_provincial` SET prov_asoc = ?, prov_dni = ?, prov_nombre = ?, prov_titularVehiculo = ?, chofer = ?, chofer_dni = ?, chofer_patente = ?, chofer_habilitacion = ?, chofer_vtoHab = ?, chofer_seguro = ?, chofer_nPoliza = ?,chofer_vtoPoliza = ?,chofer_nVtv = ?,chofer_vtoVtv = ?,chofer_vehiculo = ?,chofer_vehiculoCapacidad = ?,chofer_cupon = ?,chofer_registro = ?,chofer_prorroga = ?,chofer_cuitSocio = ?,chofer_nombreTitular = ?,chofer_cuitTitular = ?,chofer_anioMod = ?, habilitacion_colonia = ?,vtoHabilitacion_colonia = ?,tipo_habilitacion = ? ,eliminado = ? WHERE id = ?",
       [
         prov_asoc,
         prov_dni,
@@ -532,7 +436,7 @@ exports.updateProv = async (req, res) => {
         chofer_anioMod,
         habilitacion_colonia,
         vtoHabilitacion_colonia,
-        en_padron_prov,
+        tipo_habilitacion,
         eliminado,
         idToUpdate,
       ],
@@ -626,7 +530,7 @@ exports.updateImgById = async (req, res) => {
     const { img_nombre, prov_id } = req.body;
     const data = [ruta, img_nombre, prov_id];
     mysqlConnection.query(
-      "SELECT * FROM images WHERE img_nombre= ? && prov_id=? ",
+      "SELECT * FROM images_provincial WHERE img_nombre= ? && prov_id=? ",
       [img_nombre, prov_id],
       (err, result) => {
         console.log("error", err);
@@ -668,7 +572,7 @@ exports.updateImgById = async (req, res) => {
             .then(() => {
               console.log("Archivo borrado exitosamente");
               mysqlConnection.query(
-                "UPDATE images SET img_path = ? WHERE img_nombre= ? && prov_id=?",
+                "UPDATE images_provincial SET img_path = ? WHERE img_nombre= ? && prov_id=?",
                 [ruta, img_nombre, prov_id],
                 (err, rows, fields) => {
                   if (!err) {
@@ -696,7 +600,7 @@ exports.updateImgById = async (req, res) => {
             });
         } else {
           mysqlConnection.query(
-            "INSERT INTO images (`img_path`, `img_nombre`, `prov_id`) VALUES (?)",
+            "INSERT INTO images_provincial (`img_path`, `img_nombre`, `prov_id`) VALUES (?)",
             [data],
             (err, rows, fields) => {
               if (!err) {
@@ -727,7 +631,7 @@ exports.getImageById = async (req, res) => {
   try {
     const prov_id = req.params.prov_id;
     mysqlConnection.query(
-      "SELECT img_path, img_nombre FROM images WHERE prov_id = ?",
+      "SELECT img_path, img_nombre FROM images_provincial WHERE prov_id = ?",
       [prov_id],
       (err, rows, fields) => {
         if (!err) {
@@ -756,7 +660,7 @@ exports.getImageById = async (req, res) => {
 };
 
 const getImagesStatus = async (prov_id) => {
-  var sql = "SELECT img_path, img_nombre FROM images WHERE prov_id = ?";
+  var sql = "SELECT img_path, img_nombre FROM images_provincial WHERE prov_id = ?";
   const results = await mysqlConnection.promise().query(sql, [prov_id]);
 
   let imgUploads = results[0].map((e) => e.img_nombre);
@@ -783,7 +687,7 @@ exports.getImagesStatus2 = async (req, res) => {
   try {
     const prov_id = req.params.prov_id;
     mysqlConnection.query(
-      "SELECT img_path, img_nombre FROM images WHERE prov_id = ?",
+      "SELECT img_path, img_nombre FROM images_provincial WHERE prov_id = ?",
       [prov_id],
       (err, rows, fields) => {
         if (!err) {
@@ -833,7 +737,7 @@ exports.getImagesStatus2 = async (req, res) => {
 exports.getYears = async (req, res) => {
   try {
     mysqlConnection.query(
-      "SELECT chofer_anioMod FROM proveedores ORDER BY CAST(chofer_anioMod AS INT) ASC",
+      "SELECT chofer_anioMod FROM proveedores_provincial ORDER BY CAST(chofer_anioMod AS INT) ASC",
       async (err, rows, fields) => {
         let ages = [];
         let ret = [];
@@ -881,7 +785,7 @@ exports.getByYear = async (req, res) => {
   try {
     const year = req.params.year === "No Ingresado" ? 0 : req.params.year;
     mysqlConnection.query(
-      "SELECT * FROM proveedores WHERE chofer_anioMod = ?",
+      "SELECT * FROM proveedores_provincial WHERE chofer_anioMod = ?",
       [year],
       (err, rows, fields) => {
         if (!err) {
@@ -911,19 +815,19 @@ exports.getByYear = async (req, res) => {
 };
 
 async function getByYear2(year) {
-  var sql = "SELECT * FROM proveedores WHERE chofer_anioMod = ?";
+  var sql = "SELECT * FROM proveedores_provincial WHERE chofer_anioMod = ?";
   const results = await mysqlConnection.promise().query(sql, [year]);
   return results[0];
 }
 
 async function getInfo(data) {
-  var sql = "SELECT * FROM proveedores WHERE id = ?";
+  var sql = "SELECT * FROM proveedores_provincial WHERE id = ?";
   const results = await mysqlConnection.promise().query(sql, [data]);
   return results[0];
 }
 
 async function getImgs(id) {
-  var sql = "SELECT img_path, img_nombre FROM images WHERE prov_id = ?";
+  var sql = "SELECT img_path, img_nombre FROM images_provincial WHERE prov_id = ?";
   const results = await mysqlConnection.promise().query(sql, [id]);
   return results[0];
 }
@@ -931,7 +835,7 @@ async function getImgs(id) {
 /* exports.getRecordsBetweenDates = async (req, res) => {
   const query = `
   SELECT *
-  FROM proveedores
+  FROM proveedores_provincial
   WHERE
     (chofer_vtoHab BETWEEN ? AND ?)
     AND
@@ -999,7 +903,7 @@ exports.getRecordsBetweenDates = async (req, res) => {
     WHEN chofer_vtoHab >= CURDATE() AND chofer_vtoPoliza >= CURDATE() AND chofer_vtoVtv >= CURDATE() AND chofer_cupon >= CURDATE()  THEN 0
     ELSE 1 -- valor de 0 cuando NO esté expirado y un valor de 1 cuando esté expirado
   END) AS expired
-  FROM proveedores
+  FROM proveedores_provincial
   WHERE
     (chofer_vtoHab BETWEEN ? AND ?)
     AND

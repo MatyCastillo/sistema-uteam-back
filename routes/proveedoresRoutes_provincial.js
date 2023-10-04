@@ -1,6 +1,5 @@
 const express = require("express");
-const proveedoresController = require("../controllers/proveedoresController");
-const proveedoresController_provincial = require("../controllers/proveedoresController_provincial");
+const proveedoresController = require("../controllers/proveedoresController_provincial");
 const protectedRoutesMiddleware = require("../middlewares/protectedRoutesMiddleware");
 const upload = require("../libs/storage");
 const router = express.Router();
@@ -55,10 +54,6 @@ router.route("/pdf/:user").get(proveedoresController.getPdf);
 router.route("/years").get(proveedoresController.getYears);
 
 router.route("/year-:year").get(proveedoresController.getByYear);
-
-router.route("/searchBetween").post(proveedoresController.getRecordsBetweenDates);
-
-router.route("/searchBetween/generarXlsx").post(proveedoresController.generarXLSXController);
 
 // router.route("/imageUps/:prov_id").get(proveedoresController.getImagesStatus);
 
